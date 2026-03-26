@@ -1,0 +1,15 @@
+name: Sys-Pulse Build
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build and Run
+      run: |
+        docker build -t sys-pulse .
+        docker run sys-pulse
