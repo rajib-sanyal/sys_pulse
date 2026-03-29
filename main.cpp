@@ -34,6 +34,15 @@ void getSystemStats() {
     std::string load1, load5, load15;
     if (loadFile >> load1 >> load5 >> load15) {
         std::cout << "CPU Load (1/5/15 min): " << load1 << ", " << load5 << ", " << load15 << std::endl;
+	std::ifstream uptimeFile("/proc/uptime");
+double uptimeSeconds;
+if (uptimeFile >> uptimeSeconds) {
+    int days = uptimeSeconds / (24 * 3600);
+    int hours = (static_cast<int>(uptimeSeconds) % (24 * 3600)) / 3600;
+    int minutes = (static_cast<int>(uptimeSeconds) % 3600) / 60;
+
+    std::cout << "System Uptime: " << days << "days " << hours << "hours " << minutes << "minutes " << std::endl;
+}
     }
 
     // 2. Memory Info
