@@ -29,7 +29,24 @@ int main() {
 #include <sys/statvfs.h>
 #include <sstream>
 #include <vector>
+#include <dirent.h>
+#include <ctype.h>
 
+int countProcesses() {
+    int count = 0;
+    DIR* dir = opendir("/proc");
+    if (dir == nullptr) return -1;
+
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != nullptr) {
+        // Check if the directory name starts with a digit (it's a PID)
+        if (isdigit(entry->d_name[0])) {
+            count++;
+        }
+    }
+    closedir(dir);
+    return count;
+}
 
 void getSystemStats() {
     // 1. CPU Load
@@ -98,9 +115,19 @@ void getNetworkStats() {
     }
 }
 
+void getProcessStats() {
+    int totalProcs = countProcesses();
+    if (totalProcs != -1) {
+        std::cout << "Total Number of Active Processes: " << totalProcs << std::endl;
+    } else {
+        std::cerr << "Error: Could not access /proc to count the number of processes." << std::endl;
+    }
+}
+
 int main() {
-    std::cout << "--- Sys-Pulse Health Report (v1.3.0) ---" << std::endl;
+    std::cout << "--- Sys-Pulse Health Report (v1.4.0) ---" << std::endl;
     getSystemStats();
     getNetworkStats();
+    getProcessStats();
     return 0;
 }
