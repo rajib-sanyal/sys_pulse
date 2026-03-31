@@ -27,6 +27,9 @@ int main() {
 #include <fstream>
 #include <string>
 #include <sys/statvfs.h>
+#include <sstream>
+#include <vector>
+
 
 void getSystemStats() {
     // 1. CPU Load
@@ -65,8 +68,39 @@ if (uptimeFile >> uptimeSeconds) {
     }
 }
 
+void getNetworkStats() {
+    std::ifstream netFile("/proc/net/dev");
+    std::string line;
+
+    // Skip the first two header lines
+    std::getline(netFile, line);
+    std::getline(netFile, line);
+
+    while (std::getline(netFile, line)) {
+        std::stringstream ss(line);
+        std::string interface;
+        ss >> interface;
+
+        // Skip the loopback interface
+        if (interface == "lo:") continue;
+
+        unsigned long long rxBytes, txBytes, dummy;
+        // The 1st value after the interface name is Rx Bytes
+        ss >> rxBytes;
+        // Skip the next 7 values (packets, errs, drop, etc.)
+        for(int i=0; i<7; ++i) ss >> dummy;
+        // The 9th value total is Tx Bytes
+        ss >> txBytes;
+
+        std::cout << "Interface [" << interface << "]" << std::endl;
+        std::cout << " Bytes Received:    " << rxBytes / (1024 * 1024) << " MB" << std::endl;
+        std::cout << " Bytes Transmitted: " << txBytes / (1024 * 1024) << " MB" << std::endl;
+    }
+}
+
 int main() {
-    std::cout << "--- Sys-Pulse Health Report (v1.1.0) ---" << std::endl;
+    std::cout << "--- Sys-Pulse Health Report (v1.3.0) ---" << std::endl;
     getSystemStats();
+    getNetworkStats();
     return 0;
 }
